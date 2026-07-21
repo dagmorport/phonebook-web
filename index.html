@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Телефонный справочник — Демо</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            dept: {
+              apple:    { light: '#DCFCE7', DEFAULT: '#2D6A4F', dark: '#1B4332' },
+              bon:      { light: '#FEF3C7', DEFAULT: '#BC6C25', dark: '#7C4A15' },
+              pascucci: { light: '#F3E8E0', DEFAULT: '#6F4E37', dark: '#4A3324' },
+              manage:   { light: '#DBEAFE', DEFAULT: '#1D3557', dark: '#0F2340' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    ::selection { background: #1c1917; color: #fff; }
+    .dark ::selection { background: #fff; color: #1c1917; }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .card-animate { animation: cardIn 0.4s ease-out both; }
+
+    @keyframes toastIn  { from { opacity:0; transform: translateY(12px) scale(0.95); } to { opacity:1; transform: translateY(0) scale(1); } }
+    @keyframes toastOut { from { opacity:1; transform: translateY(0) scale(1); } to { opacity:0; transform: translateY(-8px) scale(0.95); } }
+    .toast-in  { animation: toastIn 0.3s ease-out both; }
+    .toast-out { animation: toastOut 0.25s ease-in both; }
+
+    @keyframes pulseRing {
+      0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+      70%  { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
+      100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+    }
+    .call-pulse:hover { animation: pulseRing 1.2s ease-out infinite; }
+
+    .custom-scroll::-webkit-scrollbar { width: 4px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 999px; }
+    .dark .custom-scroll::-webkit-scrollbar-thumb { background: #44403c; }
+
+    .alpha-btn { transition: all 0.15s; }
+    .alpha-btn:hover, .alpha-btn.active { transform: scale(1.4); color: #1c1917; font-weight: 600; }
+    .dark .alpha-btn:hover, .dark .alpha-btn.active { color: #fff; }
+
+    .emp-card { transition: transform 0.25s ease, box-shadow 0.25s ease; }
+    .emp-card.selected { box-shadow: 0 0 0 2px #4CAF50, 0 4px 12px rgba(76,175,80,0.25); transform: translateY(-2px); }
+    .emp-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px -5px rgba(0,0,0,0.1), 0 4px 10px -6px rgba(0,0,0,0.08);
+    }
+    .dark .emp-card:hover {
+      box-shadow: 0 8px 25px -5px rgba(0,0,0,0.4), 0 4px 10px -6px rgba(0,0,0,0.3);
+    }
+
+    .star-btn { transition: transform 0.2s; }
+    .star-btn:active { transform: scale(1.3); }
+    .star-btn.favorited svg { fill: #f59e0b; color: #f59e0b; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
+    }
+    .float-anim { animation: float 3s ease-in-out infinite; }
+  </style>
+</head>
+
+<body class="bg-[#F2F2F2] dark:bg-stone-950 font-sans text-stone-900 dark:text-stone-100 min-h-screen transition-colors duration-300">
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-2 pointer-events-none"></div>
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-50 bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl border-b border-stone-200 dark:border-stone-800 transition-colors duration-300">
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10">
+      <div class="flex items-center justify-between h-16">
+        <!-- Left: Logo + Name + Subtitle -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+            <svg width="40" height="40" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="32" cy="36" r="22" fill="#4CAF50"/>
+              <ellipse cx="32" cy="36" rx="14" ry="16" fill="#E8F5E9" opacity="0.4"/>
+              <circle cx="32" cy="36" r="8" fill="#FF4081"/>
+              <circle cx="32" cy="36" r="4" fill="white" opacity="0.6"/>
+              <path d="M32 14 C32 14, 38 6, 44 8" stroke="#4CAF50" stroke-width="3" stroke-linecap="round" fill="none"/>
+              <ellipse cx="42" cy="8" rx="5" ry="3" fill="#4CAF50" transform="rotate(-20 42 8)"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-base font-semibold leading-tight tracking-tight">Телефонный справочник</h1>
+            <div class="flex items-center gap-2 text-[11px] text-stone-400 dark:text-stone-500 leading-none mt-0.5">
+              <span>Корпоративный справочник</span>
+              <span class="hidden sm:inline">|</span>
+              <a href="https://example.com" target="_blank" class="hidden sm:inline hover:text-green-600 dark:hover:text-green-400 transition-colors">example.com</a>
+            </div>
+          </div>
+        </div>
+        <!-- Right: Counter + Email + Actions -->
+        <div class="flex items-center gap-3">
+          <div class="hidden sm:flex items-center gap-1.5 text-stone-500 dark:text-stone-400">
+            <i data-lucide="users" class="w-4 h-4"></i>
+            <span id="count-badge" class="text-sm font-bold">0</span>
+            <span class="text-xs">сотрудников</span>
+          </div>
+          <a href="mailto:it@example.com" class="hidden md:flex items-center gap-1.5 text-xs text-stone-400 dark:text-stone-500 hover:text-green-600 dark:hover:text-green-400 transition-colors" title="Написать в IT-отдел">
+            <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+            <span>it@example.com</span>
+          </a>
+          <button id="fav-filter-btn" class="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors" title="Избранное">
+            <i data-lucide="star" class="w-4 h-4 text-stone-400"></i>
+          </button>
+          <button id="dark-toggle-btn" class="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors" title="Тёмная тема">
+            <i data-lucide="sun" class="w-4 h-4 text-stone-400 dark:hidden"></i>
+            <i data-lucide="moon" class="w-4 h-4 text-stone-400 hidden dark:block"></i>
+          </button>
+          <button id="about-btn" class="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors" title="О программе">
+            <i data-lucide="info" class="w-4 h-4 text-stone-400"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ABOUT MODAL -->
+  <div id="about-modal" class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div class="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-stone-900 dark:text-stone-100">О программе</h2>
+          <button id="about-close" class="w-8 h-8 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 flex items-center justify-center transition-colors">
+            <i data-lucide="x" class="w-4 h-4 text-stone-500"></i>
+          </button>
+        </div>
+
+        <div class="space-y-4 text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
+          <div>
+            <h3 class="font-semibold text-stone-800 dark:text-stone-200 mb-1">Телефонный справочник — Демо</h3>
+            <p>Веб-приложение для просмотра контактов сотрудников. Данные загружаются из внешнего источника.</p>
+          </div>
+
+          <div>
+            <h3 class="font-semibold text-stone-800 dark:text-stone-200 mb-1">Возможности</h3>
+            <ul class="list-disc list-inside space-y-0.5">
+              <li>Поиск по имени, фамилии, должности, отделу</li>
+              <li>Алфавитный указатель для быстрой навигации</li>
+              <li>Тёмная тема</li>
+              <li>Избранное (сохраняется в браузере)</li>
+              <li>Копирование email одним кликом</li>
+              <li>Автоматическая синхронизация с AD</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 class="font-semibold text-stone-800 dark:text-stone-200 mb-1">Инструменты и технологии</h3>
+            <ul class="list-disc list-inside space-y-1">
+              <li><strong>HTML5</strong> — структура приложения, один самодостаточный файл</li>
+              <li><strong>Tailwind CSS</strong> — утилитарные стили, адаптивная вёрстка, тёмная тема</li>
+              <li><strong>Lucide Icons</strong> — lightweight SVG-иконки (поиск, звезда, телефон и др.)</li>
+              <li><strong>PowerShell 5.1</strong> — скрипт экспорта данных из внешних источников</li>
+              <li><strong>LDAP</strong> — протокол доступа к каталогам</li>
+              <li><strong>Vanilla JavaScript</strong> — логика приложения без фреймворков: поиск, фильтрация, локальное хранилище, делегирование событий</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 class="font-semibold text-stone-800 dark:text-stone-200 mb-1">AI-ассистенты</h3>
+            <ul class="list-disc list-inside space-y-1">
+              <li><strong>AI-ассистенты</strong> — инструменты для разработки и проектирования</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 class="font-semibold text-stone-800 dark:text-stone-200 mb-1">Постановщик задачи</h3>
+            <p>Разработка и тестирование.</p>
+          </div>
+
+          <div class="pt-2 border-t border-stone-200 dark:border-stone-700">
+            <p class="text-xs text-stone-400">Версия 1.14 | 2026</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-6">
+
+    <!-- SEARCH -->
+    <div class="relative mb-5 sticky top-16 z-40 bg-[#F2F2F2] dark:bg-stone-950 py-2">
+      <i data-lucide="search" class="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400 pointer-events-none"></i>
+      <input
+        id="search-input"
+        type="text"
+        placeholder="Имя, должность, отдел…"
+        class="w-full h-12 pl-12 pr-12 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-base placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-transparent transition-all duration-200 shadow-md shadow-stone-200/50 dark:shadow-stone-800/50"
+      >
+      <button id="clear-btn" class="absolute right-5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors hidden">
+        <i data-lucide="x" class="w-4 h-4 text-stone-400"></i>
+      </button>
+    </div>
+
+    <!-- CONTENT GRID -->
+    <div class="flex gap-6 relative">
+      <div class="flex-1 min-w-0">
+        <div id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+        <div id="empty-state" class="hidden flex-col items-center justify-center py-20 text-center">
+          <div class="float-anim mb-6">
+            <div class="w-20 h-20 rounded-3xl bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+              <i data-lucide="user-x" class="w-9 h-9 text-stone-300 dark:text-stone-600"></i>
+            </div>
+          </div>
+          <p class="text-lg font-medium text-stone-500 dark:text-stone-400">Ничего не найдено</p>
+          <p class="text-sm text-stone-400 dark:text-stone-500 mt-1">Попробуйте изменить запрос или фильтр</p>
+        </div>
+      </div>
+      <div id="alpha-bar" class="hidden lg:flex flex-col items-center gap-0.5 py-4 sticky top-24 self-start"></div>
+    </div>
+  </main>
+
+  <!-- Данные сотрудников: загружаются из внешнего источника -->
+  <script src="employees.js"></script>
+
+  <script>
+    // ============ SECURITY: Escape HTML entities ============
+    function escapeHtml(str) {
+      if (typeof str !== 'string') return '';
+      var el = document.createElement('span');
+      el.textContent = str;
+      return el.innerHTML;
+    }
+
+    // ============ FALLBACK DATA (если employees.js не загружен) ============
+    if (typeof employees === 'undefined' || !Array.isArray(employees) || employees.length === 0) {
+      var employees = [
+        { last: 'Иванов',     first: 'Алексей',   dept: 'apple',    deptName: 'Яблоко Экспресс 101',  role: 'Директор',         phone: '+7 (495) 123-45-01', email: 'ivanov@example.com',   room: '101' },
+        { last: 'Петрова',    first: 'Мария',     dept: 'apple',    deptName: 'Яблоко Экспресс 101',  role: 'Старший менеджер', phone: '+7 (495) 123-45-02', email: 'petrova@example.com',  room: '101' },
+        { last: 'Сидоров',    first: 'Дмитрий',   dept: 'apple',    deptName: 'Яблоко Экспресс 101',  role: 'Логист',           phone: '+7 (495) 123-45-03', email: 'sidorov@example.com',  room: '101' },
+        { last: 'Козлова',    first: 'Анна',      dept: 'apple',    deptName: 'Яблоко Экспресс 101',  role: 'Кассир',           phone: '+7 (495) 123-45-04', email: 'kozlova@example.com',  room: '101' },
+        { last: 'Морозов',    first: 'Артём',     dept: 'apple',    deptName: 'Яблоко Экспресс 101',  role: 'Курьер',           phone: '+7 (495) 123-45-05', email: 'morozov@example.com',  room: '101' },
+        { last: 'Кузнецова',  first: 'Елена',     dept: 'bon',      deptName: 'БонАппетит Ярославка 59', role: 'Управляющий',      phone: '+7 (495) 234-56-01', email: 'kuznetsova@example.com', room: '59' },
+        { last: 'Попов',      first: 'Сергей',    dept: 'bon',      deptName: 'БонАппетит Ярославка 59', role: 'Шеф-повар',        phone: '+7 (495) 234-56-02', email: 'popov@example.com',     room: '59' },
+        { last: 'Васильева',  first: 'Ольга',     dept: 'bon',      deptName: 'БонАппетит Ярославка 59', role: 'Су-шеф',           phone: '+7 (495) 234-56-03', email: 'vasilieva@example.com', room: '59' },
+        { last: 'Новиков',    first: 'Андрей',    dept: 'bon',      deptName: 'БонАппетит Ярославка 59', role: 'Официант',         phone: '+7 (495) 234-56-04', email: 'novikov@example.com',   room: '59' },
+        { last: 'Фёдорова',   first: 'Наталья',   dept: 'bon',      deptName: 'БонАппетит Ярославка 59', role: 'Администратор',    phone: '+7 (495) 234-56-05', email: 'fedorova@example.com',  room: '59' },
+        { last: 'Соколов',    first: 'Максим',    dept: 'bon',      deptName: 'БонАппетит Ярославка 59', role: 'Бармен',           phone: '+7 (495) 234-56-06', email: 'sokolov@example.com',   room: '59' },
+        { last: 'Белова',     first: 'Ирина',     dept: 'pascucci', deptName: 'PASCUCCI Shop',         role: 'Управляющий',      phone: '+7 (495) 345-67-01', email: 'shop@example.com',      room: 'Shop' },
+        { last: 'Григорьев',  first: 'Павел',     dept: 'pascucci', deptName: 'PASCUCCI Shop',         role: 'Бариста',          phone: '+7 (495) 345-67-02', email: 'grigoriev@example.com', room: 'Shop' },
+        { last: 'Орлова',     first: 'Дарья',     dept: 'pascucci', deptName: 'PASCUCCI Shop',         role: 'Бариста',          phone: '+7 (495) 345-67-03', email: 'orlova@example.com',    room: 'Shop' },
+        { last: 'Лебедев',    first: 'Кирилл',    dept: 'pascucci', deptName: 'PASCUCCI Shop',         role: 'Кондитер',         phone: '+7 (495) 345-67-04', email: 'lebedev@example.com',   room: 'Shop' },
+        { last: 'Смирнова',   first: 'Татьяна',   dept: 'manage',   deptName: 'Управление',            role: 'Генеральный директор', phone: '+7 (495) 456-78-01', email: 'smirnova@example.com',  room: '200' },
+        { last: 'Волков',     first: 'Роман',     dept: 'manage',   deptName: 'Управление',            role: 'Финансовый директор', phone: '+7 (495) 456-78-02', email: 'volkov@example.com',    room: '200' },
+        { last: 'Зайцева',    first: 'Екатерина', dept: 'manage',   deptName: 'Управление',            role: 'HR-менеджер',      phone: '+7 (495) 456-78-03', email: 'zaiceva@example.com',   room: '201' },
+      ];
+    }
+
+    // ============ STATE ============
+    var currentDept = 'all';
+    var currentSearch = '';
+    var showFavoritesOnly = false;
+    var selectedEmail = '';
+    var favorites = [];
+    try { favorites = JSON.parse(localStorage.getItem('pb_favs') || '[]'); if (!Array.isArray(favorites)) favorites = []; } catch(e) { favorites = []; }
+
+    // ============ DYNAMIC DEPARTMENT COLORS ============
+    var colorPalette = [
+      { border: '#2D6A4F', bg: '#DCFCE7', dot: '#2D6A4F', text: '#1B4332' },
+      { border: '#BC6C25', bg: '#FEF3C7', dot: '#BC6C25', text: '#7C4A15' },
+      { border: '#6F4E37', bg: '#F3E8E0', dot: '#6F4E37', text: '#4A3324' },
+      { border: '#1D3557', bg: '#DBEAFE', dot: '#1D3557', text: '#0F2340' },
+      { border: '#7B2D8B', bg: '#F3E8F6', dot: '#7B2D8B', text: '#5A1D66' },
+      { border: '#C0392B', bg: '#FDE8E8', dot: '#C0392B', text: '#922B21' },
+      { border: '#16A085', bg: '#E0F7F3', dot: '#16A085', text: '#0E6655' },
+      { border: '#D4AC0D', bg: '#FEF9E7', dot: '#D4AC0D', text: '#9A7D0A' },
+      { border: '#2E86C1', bg: '#EBF5FB', dot: '#2E86C1', text: '#1B6CA8' },
+      { border: '#E67E22', bg: '#FDF2E9', dot: '#E67E22', text: '#BA6412' },
+      { border: '#8E44AD', bg: '#F5EEF8', dot: '#8E44AD', text: '#6C3483' },
+      { border: '#27AE60', bg: '#EAFAF1', dot: '#27AE60', text: '#1E8449' },
+      { border: '#2C3E50', bg: '#EBEDEF', dot: '#2C3E50', text: '#1A252F' },
+      { border: '#1ABC9C', bg: '#E8F8F5', dot: '#1ABC9C', text: '#148F77' },
+      { border: '#E74C3C', bg: '#FDEDEC', dot: '#E74C3C', text: '#C0392B' },
+      { border: '#34495E', bg: '#EBEDEF', dot: '#34495E', text: '#2C3E50' },
+    ];
+    var deptColorCache = {};
+
+    function getDeptColor(slug) {
+      if (deptColorCache[slug]) return deptColorCache[slug];
+      var hash = 0;
+      for (var i = 0; i < slug.length; i++) {
+        hash = ((hash << 5) - hash) + slug.charCodeAt(i);
+        hash = hash & 0x7FFFFFFF;
+      }
+      var p = colorPalette[hash % colorPalette.length];
+      var r = { borderStyle: 'border-left: 3px solid ' + p.border + ';', dotStyle: 'background-color:' + p.dot + ';', avatarStyle: 'background-color:' + p.border + ';', headerStyle: 'color:' + p.text + ';' };
+      deptColorCache[slug] = r;
+      return r;
+    }
+
+    // ============ INIT ============
+    function init() {
+      buildAlphaBar();
+      render();
+
+      // Restore dark mode
+      if (localStorage.getItem('pb_dark') === 'true') {
+        document.documentElement.classList.add('dark');
+      }
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', function(e) {
+        if (e.key === '/' && document.activeElement !== document.getElementById('search-input')) {
+          e.preventDefault();
+          document.getElementById('search-input').focus();
+        }
+        if (e.key === 'Escape') {
+          clearSearch();
+          document.getElementById('search-input').blur();
+        }
+      });
+
+      // Cards grid — single event delegation for ALL card actions
+      document.getElementById('cards-grid').addEventListener('click', handleCardClick);
+
+      // Search input
+      document.getElementById('search-input').addEventListener('input', onSearch);
+
+      // Clear search button
+      document.getElementById('clear-btn').addEventListener('click', clearSearch);
+
+      // Favorites filter (header button)
+      document.getElementById('fav-filter-btn').addEventListener('click', toggleFavorites);
+
+      // Dark mode toggle (header button)
+      document.getElementById('dark-toggle-btn').addEventListener('click', toggleDark);
+
+      // About modal
+      document.getElementById('about-btn').addEventListener('click', function() {
+        var modal = document.getElementById('about-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        lucide.createIcons({ nodes: [modal] });
+      });
+      document.getElementById('about-close').addEventListener('click', function() {
+        document.getElementById('about-modal').classList.add('hidden');
+        document.getElementById('about-modal').classList.remove('flex');
+      });
+      document.getElementById('about-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.add('hidden');
+          this.classList.remove('flex');
+        }
+      });
+    }
+
+    // ============ EVENT DELEGATION: Card grid clicks ============
+    function handleCardClick(e) {
+      // Star (favorite) button
+      var starBtn = e.target.closest('[data-action="toggle-fav"]');
+      if (starBtn) {
+        e.stopPropagation();
+        e.preventDefault();
+        toggleFav(starBtn.dataset.email);
+        return;
+      }
+
+      // Copy email button
+      var copyBtn = e.target.closest('[data-action="copy-email"]');
+      if (copyBtn) {
+        e.stopPropagation();
+        e.preventDefault();
+        copyEmail(copyBtn.dataset.email);
+        return;
+      }
+
+      // Phone link — just navigate, don't select
+      var phoneLink = e.target.closest('.phone-link');
+      if (phoneLink) {
+        return;
+      }
+
+      // Click on card — toggle selection
+      var card = e.target.closest('.emp-card');
+      if (card) {
+        var email = card.querySelector('[data-action="copy-email"]').dataset.email;
+        if (selectedEmail === email) {
+          // Deselect
+          selectedEmail = '';
+          card.classList.remove('selected');
+        } else {
+          // Deselect previous
+          var prev = document.querySelector('.emp-card.selected');
+          if (prev) prev.classList.remove('selected');
+          // Select new
+          selectedEmail = email;
+          card.classList.add('selected');
+          // Auto-scroll if not visible
+          var rect = card.getBoundingClientRect();
+          if (rect.top < 0 || rect.bottom > window.innerHeight) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      }
+    }
+
+    // ============ ALPHABET BAR ============
+    function buildAlphaBar() {
+      var bar = document.getElementById('alpha-bar');
+      var letters = {};
+      employees.forEach(function(e) { letters[e.last[0].toUpperCase()] = true; });
+      var allLetters = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'.split('');
+      allLetters.forEach(function(l) {
+        var btn = document.createElement('button');
+        var hasLetter = letters[l];
+        btn.className = 'alpha-btn text-xs font-medium w-6 h-6 flex items-center justify-center rounded-lg text-stone-400 dark:text-stone-600 ' + (hasLetter ? 'hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer' : 'opacity-30 cursor-default');
+        btn.textContent = l;
+        btn.dataset.letter = l;
+        if (hasLetter) {
+          btn.addEventListener('click', function() { scrollToLetter(l); });
+        }
+        bar.appendChild(btn);
+      });
+    }
+
+    function scrollToLetter(letter) {
+      var card = document.querySelector('[data-letter="' + letter + '"]');
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.classList.add('ring-2', 'ring-stone-900', 'dark:ring-stone-100');
+        setTimeout(function() { card.classList.remove('ring-2', 'ring-stone-900', 'dark:ring-stone-100'); }, 1200);
+      }
+    }
+
+    // ============ SEARCH ============
+    function onSearch() {
+      var val = document.getElementById('search-input').value.trim();
+      currentSearch = val.toLowerCase();
+      document.getElementById('clear-btn').classList.toggle('hidden', !val);
+      render();
+    }
+
+    function clearSearch() {
+      document.getElementById('search-input').value = '';
+      currentSearch = '';
+      document.getElementById('clear-btn').classList.add('hidden');
+      render();
+    }
+
+    // ============ FAVORITES ============
+    function toggleFavorites() {
+      showFavoritesOnly = !showFavoritesOnly;
+      var btn = document.getElementById('fav-filter-btn');
+      btn.classList.toggle('bg-amber-50', showFavoritesOnly);
+      btn.classList.toggle('dark:bg-amber-900/20', showFavoritesOnly);
+      render();
+    }
+
+    function toggleFav(email) {
+      var idx = favorites.indexOf(email);
+      if (idx > -1) {
+        favorites.splice(idx, 1);
+        showToast('Убрано из избранного', 'star-off');
+      } else {
+        favorites.push(email);
+        showToast('Добавлено в избранное', 'star');
+      }
+      localStorage.setItem('pb_favs', JSON.stringify(favorites));
+      render();
+    }
+
+    // ============ DARK MODE ============
+    function toggleDark() {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('pb_dark', document.documentElement.classList.contains('dark'));
+    }
+
+    // ============ TOAST ============
+    function showToast(message, icon) {
+      icon = icon || 'check';
+      var container = document.getElementById('toast-container');
+      var toast = document.createElement('div');
+      toast.className = 'toast-in pointer-events-auto flex items-center gap-2 px-4 py-2.5 rounded-xl bg-stone-900 dark:bg-white text-white dark:text-stone-900 text-sm font-medium shadow-lg';
+      toast.innerHTML = '<i data-lucide="' + escapeHtml(icon) + '" class="w-4 h-4"></i><span>' + escapeHtml(message) + '</span>';
+      container.appendChild(toast);
+      lucide.createIcons({ nodes: [toast] });
+      setTimeout(function() {
+        toast.classList.remove('toast-in');
+        toast.classList.add('toast-out');
+        setTimeout(function() { toast.remove(); }, 250);
+      }, 2000);
+    }
+
+    // ============ COPY EMAIL ============
+    function copyEmail(email) {
+      navigator.clipboard.writeText(email).then(function() {
+        showToast('Email скопирован', 'copy-check');
+      }).catch(function() {
+        var ta = document.createElement('textarea');
+        ta.value = email;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+        showToast('Email скопирован', 'copy-check');
+      });
+    }
+
+    // ============ RENDER ============
+    function render() {
+      var grid = document.getElementById('cards-grid');
+      var empty = document.getElementById('empty-state');
+
+      var filtered = employees.filter(function(e) {
+        if (currentDept !== 'all' && e.dept !== currentDept) return false;
+        if (showFavoritesOnly && favorites.indexOf(e.email) === -1) return false;
+        if (currentSearch) {
+          var words = currentSearch.split(/\s+/);
+          var haystack = (
+            e.last + ' ' + e.first + ' ' + e.role + ' ' +
+            e.deptName + ' ' + e.phone + ' ' + e.email
+          ).toLowerCase();
+          for (var i = 0; i < words.length; i++) {
+            if (haystack.indexOf(words[i]) === -1) return false;
+          }
+          return true;
+        }
+        return true;
+      });
+
+      filtered.sort(function(a, b) { return a.last.localeCompare(b.last, 'ru'); });
+
+      document.getElementById('count-badge').textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+        empty.classList.add('flex');
+        lucide.createIcons({ nodes: [empty] });
+        return;
+      }
+
+      empty.classList.add('hidden');
+      empty.classList.remove('flex');
+
+      // Group by department
+      var groups = {};
+      var groupOrder = [];
+      filtered.forEach(function(e) {
+        if (!groups[e.dept]) {
+          groups[e.dept] = { name: e.deptName, dept: e.dept, items: [] };
+          groupOrder.push(e.dept);
+        }
+        groups[e.dept].items.push(e);
+      });
+
+      // Sort: real departments first (alphabetically), empty dept last
+      groupOrder.sort(function(a, b) {
+        var na = groups[a].name;
+        var nb = groups[b].name;
+        if (!na && nb) return 1;
+        if (na && !nb) return -1;
+        if (!na && !nb) return 0;
+        return na.localeCompare(nb, 'ru');
+      });
+
+      var html = '';
+      var delay = 0;
+
+      groupOrder.forEach(function(deptKey) {
+        var group = groups[deptKey];
+        var c = getDeptColor(group.dept);
+
+        // Department header
+        html += '<div class="md:col-span-2 xl:col-span-3 flex items-center gap-3 mt-4 mb-1 first:mt-0">'
+          + '<span class="w-2 h-2 rounded-full" style="' + c.dotStyle + '"></span>'
+          + '<h2 class="text-sm font-semibold tracking-tight" style="' + c.headerStyle + '">' + escapeHtml(group.name) + '</h2>'
+          + '<span class="text-xs text-stone-400 dark:text-stone-500">' + group.items.length + '</span>'
+          + '<div class="flex-1 h-px bg-stone-200 dark:bg-stone-800"></div>'
+          + '</div>';
+
+        group.items.forEach(function(emp) {
+          var isFav = favorites.indexOf(emp.email) !== -1;
+          var initials = emp.last[0] + emp.first[0];
+          var letter = emp.last[0].toUpperCase();
+          var cleanPhone = emp.phone.replace(/[\s()-]/g, '');
+
+          html += '<div class="emp-card card-animate bg-white dark:bg-stone-900 rounded-2xl p-3 cursor-pointer select-none relative group" style="animation-delay:' + delay + 'ms; ' + c.borderStyle + '" data-letter="' + escapeHtml(letter) + '">'
+
+            // Favorite button
+            + '<button class="star-btn absolute top-2 right-2 p-1 rounded-lg opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity' + (isFav ? ' favorited opacity-100' : '') + '" data-action="toggle-fav" data-email="' + escapeHtml(emp.email) + '" title="Избранное">'
+            + '<i data-lucide="star" class="w-4 h-4 ' + (isFav ? 'text-amber-500' : 'text-stone-300 dark:text-stone-600') + '"' + (isFav ? ' style="fill:currentColor"' : '') + '></i>'
+            + '</button>'
+
+            // Avatar + Name
+            + '<div class="flex items-center gap-2.5 mb-2">'
+            + '<div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-semibold flex-shrink-0" style="' + c.avatarStyle + '">' + escapeHtml(initials) + '</div>'
+            + '<div class="min-w-0">'
+            + '<p class="font-semibold text-sm tracking-tight truncate">' + escapeHtml(emp.last) + ' ' + escapeHtml(emp.first) + '</p>'
+            + '<p class="text-xs text-stone-500 dark:text-stone-400 truncate">' + escapeHtml(emp.role) + '</p>'
+            + '</div></div>'
+
+            // Phone
+            + '<a href="tel:' + escapeHtml(cleanPhone) + '" class="phone-link flex items-center gap-2 text-sm font-medium text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors mb-1">'
+            + '<i data-lucide="phone" class="w-3.5 h-3.5"></i>'
+            + '<span>' + escapeHtml(emp.phone) + '</span>'
+            + '</a>'
+
+            // Email (always visible)
+            + '<button data-action="copy-email" data-email="' + escapeHtml(emp.email) + '" class="flex items-center gap-2 text-xs text-stone-400 dark:text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 transition-colors w-full text-left" title="Нажмите, чтобы скопировать">'
+            + '<i data-lucide="mail" class="w-3.5 h-3.5 flex-shrink-0"></i>'
+            + '<span class="truncate">' + escapeHtml(emp.email) + '</span>'
+            + '</button>'
+
+            + '</div>';
+
+          delay += 40;
+        });
+      });
+
+      grid.innerHTML = html;
+      lucide.createIcons();
+
+      // Restore selection
+      if (selectedEmail) {
+        var cards = grid.querySelectorAll('.emp-card');
+        cards.forEach(function(c) {
+          var btn = c.querySelector('[data-action="copy-email"]');
+          if (btn && btn.dataset.email === selectedEmail) {
+            c.classList.add('selected');
+          }
+        });
+      }
+    }
+
+    function pluralize(n) {
+      var mod10 = n % 10;
+      var mod100 = n % 100;
+      if (mod100 >= 11 && mod100 <= 19) return 'ов';
+      if (mod10 === 1) return '';
+      if (mod10 >= 2 && mod10 <= 4) return 'а';
+      return 'ов';
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+
+</body>
+</html>
