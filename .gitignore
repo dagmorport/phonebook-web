@@ -1,0 +1,25 @@
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editor files
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+
+# Скрипты и данные (содержат корпоративную информацию)
+Export-Phonebook.ps1
+Export-Phonebook.bat
+Phonebook.ps1
+dept-filter.json
+Logo.png
+*.txt
+sync-from-github.bat
