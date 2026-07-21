@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Телефонный справочник — Pepper Group</title>
+  <title>Телефонный справочник — Демо</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -103,11 +103,11 @@
             </svg>
           </div>
           <div>
-            <h1 class="text-base font-semibold leading-tight tracking-tight">Зеленое яблоко</h1>
+            <h1 class="text-base font-semibold leading-tight tracking-tight">Телефонный справочник</h1>
             <div class="flex items-center gap-2 text-[11px] text-stone-400 dark:text-stone-500 leading-none mt-0.5">
               <span>Корпоративный справочник</span>
               <span class="hidden sm:inline">|</span>
-              <a href="https://zelenoeyabloko.ru" target="_blank" class="hidden sm:inline hover:text-green-600 dark:hover:text-green-400 transition-colors">zelenoeyabloko.ru</a>
+              <a href="https://example.com" target="_blank" class="hidden sm:inline hover:text-green-600 dark:hover:text-green-400 transition-colors">example.com</a>
             </div>
           </div>
         </div>
@@ -118,9 +118,9 @@
             <span id="count-badge" class="text-sm font-bold">0</span>
             <span class="text-xs">сотрудников</span>
           </div>
-          <a href="mailto:it@pepper-group.ru" class="hidden md:flex items-center gap-1.5 text-xs text-stone-400 dark:text-stone-500 hover:text-green-600 dark:hover:text-green-400 transition-colors" title="Написать в IT-отдел">
+          <a href="mailto:it@example.com" class="hidden md:flex items-center gap-1.5 text-xs text-stone-400 dark:text-stone-500 hover:text-green-600 dark:hover:text-green-400 transition-colors" title="Написать в IT-отдел">
             <i data-lucide="mail" class="w-3.5 h-3.5"></i>
-            <span>it@pepper-group.ru</span>
+            <span>it@example.com</span>
           </a>
           <button id="fav-filter-btn" class="p-2 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors" title="Избранное">
             <i data-lucide="star" class="w-4 h-4 text-stone-400"></i>
@@ -150,8 +150,8 @@
 
         <div class="space-y-4 text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
           <div>
-            <h3 class="font-semibold text-stone-800 dark:text-stone-200 mb-1">Зеленое яблоко — Телефонный справочник</h3>
-            <p>Веб-приложение для просмотра контактов сотрудников компании. Данные загружаются из Active Directory.</p>
+            <h3 class="font-semibold text-stone-800 dark:text-stone-200 mb-1">Телефонный справочник — Демо</h3>
+            <p>Веб-приложение для просмотра контактов сотрудников. Данные загружаются из внешнего источника.</p>
           </div>
 
           <div>
@@ -172,8 +172,8 @@
               <li><strong>HTML5</strong> — структура приложения, один самодостаточный файл</li>
               <li><strong>Tailwind CSS</strong> — утилитарные стили, адаптивная вёрстка, тёмная тема</li>
               <li><strong>Lucide Icons</strong> — lightweight SVG-иконки (поиск, звезда, телефон и др.)</li>
-              <li><strong>PowerShell 5.1</strong> — скрипт Export-Phonebook.ps1 для выгрузки данных из Active Directory через LDAP</li>
-              <li><strong>Active Directory</strong> — источник данных о сотрудниках (System.DirectoryServices)</li>
+              <li><strong>PowerShell 5.1</strong> — скрипт экспорта данных из внешних источников</li>
+              <li><strong>LDAP</strong> — протокол доступа к каталогам</li>
               <li><strong>Vanilla JavaScript</strong> — логика приложения без фреймворков: поиск, фильтрация, локальное хранилище, делегирование событий</li>
             </ul>
           </div>
@@ -181,14 +181,13 @@
           <div>
             <h3 class="font-semibold text-stone-800 dark:text-stone-200 mb-1">AI-ассистенты</h3>
             <ul class="list-disc list-inside space-y-1">
-              <li><strong>MiMo Code (Xiaomi, модель mimo-auto)</strong> — основной AI-инструмент на всех этапах разработки: анализ требований, генерация кода, рефакторинг, проверка безопасности, отладка.</li>
-              <li><strong>GLM 5.2 (Zhipu AI)</strong> — дизайн-референс. Визуальная концепция приложения (карточки, цвета, компоновка) взята за основу из продукта GLM.</li>
+              <li><strong>AI-ассистенты</strong> — инструменты для разработки и проектирования</li>
             </ul>
           </div>
 
           <div>
             <h3 class="font-semibold text-stone-800 dark:text-stone-200 mb-1">Постановщик задачи</h3>
-            <p>Арбуханов Рустам — формулирование требований, тестирование.</p>
+            <p>Разработка и тестирование.</p>
           </div>
 
           <div class="pt-2 border-t border-stone-200 dark:border-stone-700">
@@ -234,7 +233,7 @@
     </div>
   </main>
 
-  <!-- Данные сотрудников: загружаются из employees.js (экспорт из AD) -->
+  <!-- Данные сотрудников: загружаются из внешнего источника -->
   <script src="employees.js"></script>
 
   <script>
@@ -249,24 +248,24 @@
     // ============ FALLBACK DATA (если employees.js не загружен) ============
     if (typeof employees === 'undefined' || !Array.isArray(employees) || employees.length === 0) {
       var employees = [
-        { last: 'Иванов',     first: 'Алексей',   dept: 'apple',    deptName: 'Яблоко Экспресс 101',  role: 'Директор',         phone: '+7 (495) 123-45-01', email: 'ivanov@pepper-group.ru',   room: '101' },
-        { last: 'Петрова',    first: 'Мария',     dept: 'apple',    deptName: 'Яблоко Экспресс 101',  role: 'Старший менеджер', phone: '+7 (495) 123-45-02', email: 'petrova@pepper-group.ru',  room: '101' },
-        { last: 'Сидоров',    first: 'Дмитрий',   dept: 'apple',    deptName: 'Яблоко Экспресс 101',  role: 'Логист',           phone: '+7 (495) 123-45-03', email: 'sidorov@pepper-group.ru',  room: '101' },
-        { last: 'Козлова',    first: 'Анна',      dept: 'apple',    deptName: 'Яблоко Экспресс 101',  role: 'Кассир',           phone: '+7 (495) 123-45-04', email: 'kozlova@pepper-group.ru',  room: '101' },
-        { last: 'Морозов',    first: 'Артём',     dept: 'apple',    deptName: 'Яблоко Экспресс 101',  role: 'Курьер',           phone: '+7 (495) 123-45-05', email: 'morozov@pepper-group.ru',  room: '101' },
-        { last: 'Кузнецова',  first: 'Елена',     dept: 'bon',      deptName: 'БонАппетит Ярославка 59', role: 'Управляющий',      phone: '+7 (495) 234-56-01', email: 'kuznetsova@pepper-group.ru', room: '59' },
-        { last: 'Попов',      first: 'Сергей',    dept: 'bon',      deptName: 'БонАппетит Ярославка 59', role: 'Шеф-повар',        phone: '+7 (495) 234-56-02', email: 'popov@pepper-group.ru',     room: '59' },
-        { last: 'Васильева',  first: 'Ольга',     dept: 'bon',      deptName: 'БонАппетит Ярославка 59', role: 'Су-шеф',           phone: '+7 (495) 234-56-03', email: 'vasilieva@pepper-group.ru', room: '59' },
-        { last: 'Новиков',    first: 'Андрей',    dept: 'bon',      deptName: 'БонАппетит Ярославка 59', role: 'Официант',         phone: '+7 (495) 234-56-04', email: 'novikov@pepper-group.ru',   room: '59' },
-        { last: 'Фёдорова',   first: 'Наталья',   dept: 'bon',      deptName: 'БонАппетит Ярославка 59', role: 'Администратор',    phone: '+7 (495) 234-56-05', email: 'fedorova@pepper-group.ru',  room: '59' },
-        { last: 'Соколов',    first: 'Максим',    dept: 'bon',      deptName: 'БонАппетит Ярославка 59', role: 'Бармен',           phone: '+7 (495) 234-56-06', email: 'sokolov@pepper-group.ru',   room: '59' },
-        { last: 'Белова',     first: 'Ирина',     dept: 'pascucci', deptName: 'PASCUCCI Shop',         role: 'Управляющий',      phone: '+7 (495) 345-67-01', email: 'Shop@pepper-group.ru',      room: 'Shop' },
-        { last: 'Григорьев',  first: 'Павел',     dept: 'pascucci', deptName: 'PASCUCCI Shop',         role: 'Бариста',          phone: '+7 (495) 345-67-02', email: 'grigoriev@pepper-group.ru', room: 'Shop' },
-        { last: 'Орлова',     first: 'Дарья',     dept: 'pascucci', deptName: 'PASCUCCI Shop',         role: 'Бариста',          phone: '+7 (495) 345-67-03', email: 'orlova@pepper-group.ru',    room: 'Shop' },
-        { last: 'Лебедев',    first: 'Кирилл',    dept: 'pascucci', deptName: 'PASCUCCI Shop',         role: 'Кондитер',         phone: '+7 (495) 345-67-04', email: 'lebedev@pepper-group.ru',   room: 'Shop' },
-        { last: 'Смирнова',   first: 'Татьяна',   dept: 'manage',   deptName: 'Управление',            role: 'Генеральный директор', phone: '+7 (495) 456-78-01', email: 'smirnova@pepper-group.ru',  room: '200' },
-        { last: 'Волков',     first: 'Роман',     dept: 'manage',   deptName: 'Управление',            role: 'Финансовый директор', phone: '+7 (495) 456-78-02', email: 'volkov@pepper-group.ru',    room: '200' },
-        { last: 'Зайцева',    first: 'Екатерина', dept: 'manage',   deptName: 'Управление',            role: 'HR-менеджер',      phone: '+7 (495) 456-78-03', email: 'zaiceva@pepper-group.ru',   room: '201' },
+        { last: 'Иванов',     first: 'Алексей',   dept: 'apple',    deptName: 'Яблоко Экспресс 101',  role: 'Директор',         phone: '+7 (495) 123-45-01', email: 'ivanov@example.com',   room: '101' },
+        { last: 'Петрова',    first: 'Мария',     dept: 'apple',    deptName: 'Яблоко Экспресс 101',  role: 'Старший менеджер', phone: '+7 (495) 123-45-02', email: 'petrova@example.com',  room: '101' },
+        { last: 'Сидоров',    first: 'Дмитрий',   dept: 'apple',    deptName: 'Яблоко Экспресс 101',  role: 'Логист',           phone: '+7 (495) 123-45-03', email: 'sidorov@example.com',  room: '101' },
+        { last: 'Козлова',    first: 'Анна',      dept: 'apple',    deptName: 'Яблоко Экспресс 101',  role: 'Кассир',           phone: '+7 (495) 123-45-04', email: 'kozlova@example.com',  room: '101' },
+        { last: 'Морозов',    first: 'Артём',     dept: 'apple',    deptName: 'Яблоко Экспресс 101',  role: 'Курьер',           phone: '+7 (495) 123-45-05', email: 'morozov@example.com',  room: '101' },
+        { last: 'Кузнецова',  first: 'Елена',     dept: 'bon',      deptName: 'БонАппетит Ярославка 59', role: 'Управляющий',      phone: '+7 (495) 234-56-01', email: 'kuznetsova@example.com', room: '59' },
+        { last: 'Попов',      first: 'Сергей',    dept: 'bon',      deptName: 'БонАппетит Ярославка 59', role: 'Шеф-повар',        phone: '+7 (495) 234-56-02', email: 'popov@example.com',     room: '59' },
+        { last: 'Васильева',  first: 'Ольга',     dept: 'bon',      deptName: 'БонАппетит Ярославка 59', role: 'Су-шеф',           phone: '+7 (495) 234-56-03', email: 'vasilieva@example.com', room: '59' },
+        { last: 'Новиков',    first: 'Андрей',    dept: 'bon',      deptName: 'БонАппетит Ярославка 59', role: 'Официант',         phone: '+7 (495) 234-56-04', email: 'novikov@example.com',   room: '59' },
+        { last: 'Фёдорова',   first: 'Наталья',   dept: 'bon',      deptName: 'БонАппетит Ярославка 59', role: 'Администратор',    phone: '+7 (495) 234-56-05', email: 'fedorova@example.com',  room: '59' },
+        { last: 'Соколов',    first: 'Максим',    dept: 'bon',      deptName: 'БонАппетит Ярославка 59', role: 'Бармен',           phone: '+7 (495) 234-56-06', email: 'sokolov@example.com',   room: '59' },
+        { last: 'Белова',     first: 'Ирина',     dept: 'pascucci', deptName: 'PASCUCCI Shop',         role: 'Управляющий',      phone: '+7 (495) 345-67-01', email: 'shop@example.com',      room: 'Shop' },
+        { last: 'Григорьев',  first: 'Павел',     dept: 'pascucci', deptName: 'PASCUCCI Shop',         role: 'Бариста',          phone: '+7 (495) 345-67-02', email: 'grigoriev@example.com', room: 'Shop' },
+        { last: 'Орлова',     first: 'Дарья',     dept: 'pascucci', deptName: 'PASCUCCI Shop',         role: 'Бариста',          phone: '+7 (495) 345-67-03', email: 'orlova@example.com',    room: 'Shop' },
+        { last: 'Лебедев',    first: 'Кирилл',    dept: 'pascucci', deptName: 'PASCUCCI Shop',         role: 'Кондитер',         phone: '+7 (495) 345-67-04', email: 'lebedev@example.com',   room: 'Shop' },
+        { last: 'Смирнова',   first: 'Татьяна',   dept: 'manage',   deptName: 'Управление',            role: 'Генеральный директор', phone: '+7 (495) 456-78-01', email: 'smirnova@example.com',  room: '200' },
+        { last: 'Волков',     first: 'Роман',     dept: 'manage',   deptName: 'Управление',            role: 'Финансовый директор', phone: '+7 (495) 456-78-02', email: 'volkov@example.com',    room: '200' },
+        { last: 'Зайцева',    first: 'Екатерина', dept: 'manage',   deptName: 'Управление',            role: 'HR-менеджер',      phone: '+7 (495) 456-78-03', email: 'zaiceva@example.com',   room: '201' },
       ];
     }
 
