@@ -14,3 +14,12 @@ Desktop.ini
 # Temporary files
 *.tmp
 *.bak
+
+# Скрипты и данные (содержат корпоративную информацию)
+Export-Phonebook.ps1
+Export-Phonebook.bat
+Phonebook.ps1
+employees.js
+dept-filter.json
+Logo.png
+*.txt
