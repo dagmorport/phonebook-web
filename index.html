@@ -228,6 +228,7 @@
           <p class="text-lg font-medium text-stone-500 dark:text-stone-400">Ничего не найдено</p>
           <p class="text-sm text-stone-400 dark:text-stone-500 mt-1">Попробуйте изменить запрос или фильтр</p>
         </div>
+        <div id="pagination" class="hidden flex items-center justify-center gap-2 mt-6 mb-4 flex-wrap"></div>
       </div>
       <div id="alpha-bar" class="hidden lg:flex flex-col items-center gap-0.5 py-4 sticky top-24 self-start"></div>
     </div>
@@ -276,6 +277,10 @@
     var selectedEmail = '';
     var favorites = [];
     try { favorites = JSON.parse(localStorage.getItem('pb_favs') || '[]'); if (!Array.isArray(favorites)) favorites = []; } catch(e) { favorites = []; }
+
+    // ============ PAGINATION ============
+    var currentPage = 1;
+    var itemsPerPage = 24;
 
     // ============ DYNAMIC DEPARTMENT COLORS ============
     var colorPalette = [
@@ -449,6 +454,7 @@
     function onSearch() {
       var val = document.getElementById('search-input').value.trim();
       currentSearch = val.toLowerCase();
+      currentPage = 1;
       document.getElementById('clear-btn').classList.toggle('hidden', !val);
       render();
     }
@@ -463,6 +469,7 @@
     // ============ FAVORITES ============
     function toggleFavorites() {
       showFavoritesOnly = !showFavoritesOnly;
+      currentPage = 1;
       var btn = document.getElementById('fav-filter-btn');
       btn.classList.toggle('bg-amber-50', showFavoritesOnly);
       btn.classList.toggle('dark:bg-amber-900/20', showFavoritesOnly);
@@ -523,6 +530,7 @@
     function render() {
       var grid = document.getElementById('cards-grid');
       var empty = document.getElementById('empty-state');
+      var pagination = document.getElementById('pagination');
 
       var filtered = employees.filter(function(e) {
         if (currentDept !== 'all' && e.dept !== currentDept) return false;
@@ -545,10 +553,17 @@
 
       document.getElementById('count-badge').textContent = filtered.length;
 
+      // Pagination
+      var totalPages = Math.ceil(filtered.length / itemsPerPage);
+      if (currentPage > totalPages) currentPage = 1;
+      var startIdx = (currentPage - 1) * itemsPerPage;
+      var paginatedItems = filtered.slice(startIdx, startIdx + itemsPerPage);
+
       if (filtered.length === 0) {
         grid.innerHTML = '';
         empty.classList.remove('hidden');
         empty.classList.add('flex');
+        pagination.classList.add('hidden');
         lucide.createIcons({ nodes: [empty] });
         return;
       }
@@ -559,7 +574,7 @@
       // Group by department
       var groups = {};
       var groupOrder = [];
-      filtered.forEach(function(e) {
+      paginatedItems.forEach(function(e) {
         if (!groups[e.dept]) {
           groups[e.dept] = { name: e.deptName, dept: e.dept, items: [] };
           groupOrder.push(e.dept);
@@ -633,6 +648,60 @@
 
       grid.innerHTML = html;
       lucide.createIcons();
+
+      // Render pagination controls
+      if (totalPages > 1) {
+        pagination.classList.remove('hidden');
+        var paginationHtml = '';
+
+        // Previous button
+        paginationHtml += '<button id="page-prev" class="px-3 py-2 rounded-xl text-sm font-medium transition-colors ' + (currentPage === 1 ? 'text-stone-300 dark:text-stone-600 cursor-default' : 'text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700') + '" ' + (currentPage === 1 ? 'disabled' : '') + '>&#8592;</button>';
+
+        // Page numbers
+        for (var p = 1; p <= totalPages; p++) {
+          if (p === 1 || p === totalPages || (p >= currentPage - 2 && p <= currentPage + 2)) {
+            paginationHtml += '<button class="page-btn w-10 h-10 rounded-xl text-sm font-medium transition-colors ' + (p === currentPage ? 'bg-green-600 text-white' : 'text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700') + '" data-page="' + p + '">' + p + '</button>';
+          } else if (p === currentPage - 3 || p === currentPage + 3) {
+            paginationHtml += '<span class="w-10 h-10 flex items-center justify-center text-stone-400">...</span>';
+          }
+        }
+
+        // Next button
+        paginationHtml += '<button id="page-next" class="px-3 py-2 rounded-xl text-sm font-medium transition-colors ' + (currentPage === totalPages ? 'text-stone-300 dark:text-stone-600 cursor-default' : 'text-stone-600 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700') + '" ' + (currentPage === totalPages ? 'disabled' : '') + '>&#8594;</button>';
+
+        // Page info
+        paginationHtml += '<span class="ml-4 text-sm text-stone-500 dark:text-stone-400">Стр. ' + currentPage + ' из ' + totalPages + ' (' + filtered.length + ' чел.)</span>';
+
+        pagination.innerHTML = paginationHtml;
+
+        // Add event listeners
+        document.querySelectorAll('.page-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            currentPage = parseInt(this.dataset.page);
+            render();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+        });
+
+        var prevBtn = document.getElementById('page-prev');
+        var nextBtn = document.getElementById('page-next');
+        if (prevBtn && currentPage > 1) {
+          prevBtn.addEventListener('click', function() {
+            currentPage--;
+            render();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+        }
+        if (nextBtn && currentPage < totalPages) {
+          nextBtn.addEventListener('click', function() {
+            currentPage++;
+            render();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+        }
+      } else {
+        pagination.classList.add('hidden');
+      }
 
       // Restore selection
       if (selectedEmail) {
